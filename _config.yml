@@ -41,8 +41,8 @@ baseurl: "/aiblog" # the subpath of your site, e.g. "/blog".
 minima:
   social_links:
     twitter: rashidchauhdry
-    github: rashidumer
-    linkedin: https://www.linkedin.com/in/rashidaliali/
+    github: rashidch
+    linkedin: rashidaliali
 
 # Set this to true to get LaTeX math equation support
 use_math: 
