@@ -8,7 +8,7 @@
 
 title: Rashid Ali (Rasho)
 
-description: "AI . Computer Vision . Deep Learning . Machine Learning . Problem solving ."
+description: AI . Computer Vision . Deep Learning . Machine Learning . Problem solving .
 github_username: rashidch
 # you can comment the below line out if your repo name is not different than your baseurl
 github_repo: "aiblog"
@@ -40,11 +40,12 @@ baseurl: "/aiblog" # the subpath of your site, e.g. "/blog".
 # Github and twitter are optional:
 
 minima:
-email: "rashidumer@outlook.com"
+
   social_links:
     twitter: rashidchauhdry
     github: rashidch
     linkedin: rasho
+    email: rashidumer@outlook.com
 
 # Set this to true to get LaTeX math equation support
 use_math: 
