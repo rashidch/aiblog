@@ -6,9 +6,9 @@
 # https://learn-the-web.algonquindesign.ca/topics/markdown-yaml-cheat-sheet/#yaml
 # https://learnxinyminutes.com/docs/yaml/
 
-title: AI Blog
+title: Rashid Ali (Rasho)
 
-description: An easy to use blogging platform with support for Jupyter Notebooks.
+description: AI . Computer Vision . Deep Learning . Machine Learning . Problem solving .
 github_username: rashidch
 # you can comment the below line out if your repo name is not different than your baseurl
 github_repo: "aiblog"
@@ -38,11 +38,13 @@ url: "https://rashidch.github.io" # the base hostname & protocol for your site, 
 baseurl: "/aiblog" # the subpath of your site, e.g. "/blog".
 
 # Github and twitter are optional:
+
 minima:
+
   social_links:
     twitter: rashidchauhdry
-    github: rashidumer
-    linkedin: in/rashidaliali
+    github: rashidch
+    linkedin: rasho
 
 # Set this to true to get LaTeX math equation support
 use_math: 
