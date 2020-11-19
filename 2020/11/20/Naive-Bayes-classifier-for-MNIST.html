@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Implementation Naive Bayes classifier and Online Learning | Rashid Ali</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Implementation Naive Bayes classifier and Online Learning" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="AI . Computer Vision . Deep Learning . Machine Learning . Problem solving ." />
+<meta property="og:description" content="AI . Computer Vision . Deep Learning . Machine Learning . Problem solving ." />
+<link rel="canonical" href="https://rashidch.github.io/aiblog/2020/11/20/Naive-Bayes-classifier-for-MNIST.html" />
+<meta property="og:url" content="https://rashidch.github.io/aiblog/2020/11/20/Naive-Bayes-classifier-for-MNIST.html" />
+<meta property="og:site_name" content="Rashid Ali" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-11-20T00:00:00-06:00" />
+<script type="application/ld+json">
+{"description":"AI . Computer Vision . Deep Learning . Machine Learning . Problem solving .","url":"https://rashidch.github.io/aiblog/2020/11/20/Naive-Bayes-classifier-for-MNIST.html","@type":"BlogPosting","headline":"Implementation Naive Bayes classifier and Online Learning","dateModified":"2020-11-20T00:00:00-06:00","datePublished":"2020-11-20T00:00:00-06:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://rashidch.github.io/aiblog/2020/11/20/Naive-Bayes-classifier-for-MNIST.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/aiblog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://rashidch.github.io/aiblog/feed.xml" title="Rashid Ali" /><link rel="shortcut icon" type="image/x-icon" href="/aiblog/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/aiblog/">Rashid Ali</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/aiblog/about/">About Me</a><a class="page-link" href="/aiblog/search/">Search</a><a class="page-link" href="/aiblog/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Implementation Naive Bayes classifier and Online Learning</h1><p class="post-meta post-meta-title"><time class="dt-published" datetime="2020-11-20T00:00:00-06:00" itemprop="datePublished">
+        Nov 20, 2020
+      </time>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      15 min read
+    
+</span></p>
+
+    
+
+    
+      
+        <div class="pb-5 d-flex flex-wrap flex-justify-end">
+          <div class="px-2">
+
+    <a href="https://github.com/rashidch/aiblog/tree/master/_notebooks/2020-11-20-Naive Bayes classifier for MNIST.ipynb" role="button" target="_blank">
+<img class="notebook-badge-image" src="/aiblog/assets/badges/github.svg" alt="View On GitHub">
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://mybinder.org/v2/gh/rashidch/aiblog/master?filepath=_notebooks%2F2020-11-20-Naive+Bayes+classifier+for+MNIST.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/aiblog/assets/badges/binder.svg" alt="Open In Binder"/>
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://colab.research.google.com/github/rashidch/aiblog/blob/master/_notebooks/2020-11-20-Naive Bayes classifier for MNIST.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/aiblog/assets/badges/colab.svg" alt="Open In Colab"/>
+    </a>
+</div>
+        </div>
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2020-11-20-Naive Bayes classifier for MNIST.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>
+<span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">log</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">exp</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">factorial</span><span class="p">,</span> <span class="n">erf</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">load_file</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dset</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">magic_number</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="c1"># read first four bytes</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_dim</span> <span class="o">=</span> <span class="n">magic_number</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1">#n_dim=3</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_dims</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">byteorder</span><span class="o">=</span><span class="s1">&#39;big&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_dim</span><span class="p">)]</span> <span class="c1">#n_dims=[60000,28,28]</span>
+            <span class="c1">#read a vector of size 784 for each iteration </span>
+            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="n">item</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">:</span> <span class="n">x</span><span class="o">*</span><span class="n">y</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_dims</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">])))</span> 
+        
+                <span class="bp">self</span><span class="o">.</span><span class="n">dset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">file_1</span> <span class="o">=</span> <span class="s1">&#39;train-images.idx3-ubyte&#39;</span>
+<span class="n">file_2</span> <span class="o">=</span> <span class="s1">&#39;train-labels.idx1-ubyte&#39;</span>
+<span class="n">file_3</span> <span class="o">=</span> <span class="s1">&#39;t10k-images.idx3-ubyte&#39;</span>
+<span class="n">file_4</span> <span class="o">=</span> <span class="s1">&#39;t10k-labels.idx1-ubyte&#39;</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">train_x</span> <span class="o">=</span> <span class="n">load_file</span><span class="p">(</span><span class="n">file_1</span><span class="p">)</span>
+<span class="n">train_y</span> <span class="o">=</span> <span class="n">load_file</span><span class="p">(</span><span class="n">file_2</span><span class="p">)</span>
+<span class="n">test_x</span>  <span class="o">=</span> <span class="n">load_file</span><span class="p">(</span><span class="n">file_3</span><span class="p">)</span>
+<span class="n">test_y</span>  <span class="o">=</span> <span class="n">load_file</span><span class="p">(</span><span class="n">file_4</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">len</span><span class="p">(</span><span class="n">train_x</span><span class="o">.</span><span class="n">dset</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_y</span><span class="o">.</span><span class="n">dset</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_x</span><span class="o">.</span><span class="n">dset</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_y</span><span class="o">.</span><span class="n">dset</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(60000, 60000, 10000, 10000)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">showImage</span><span class="p">(</span><span class="n">byte</span><span class="p">,</span> <span class="n">row</span> <span class="o">=</span> <span class="mi">28</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="mi">28</span><span class="p">):</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="p">[[</span><span class="n">byte</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="mi">28</span> <span class="o">+</span> <span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">col</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">row</span><span class="p">)]</span>
+    
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_idx</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">showImage</span><span class="p">(</span><span class="n">train_x</span><span class="o">.</span><span class="n">dset</span><span class="p">[</span><span class="n">data_idx</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;labels [</span><span class="si">{}</span><span class="s2">] : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data_idx</span><span class="p">,</span> <span class="n">train_y</span><span class="o">.</span><span class="n">dset</span><span class="p">[</span><span class="n">data_idx</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>labels [10] : 3
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,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
+" />
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Discrete">Discrete<a class="anchor-link" href="#Discrete"> </a></h1>
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">cnt_pixclass</span><span class="p">(</span><span class="n">train_x</span><span class="p">,</span> <span class="n">train_y</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="mi">28</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="mi">28</span><span class="p">,</span> <span class="n">nc</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**-</span><span class="mi">6</span><span class="p">):</span>
+    
+    <span class="n">pixels_cnt</span> <span class="o">=</span> <span class="p">[[[</span><span class="n">bins</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">32</span><span class="p">)]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">h</span><span class="p">)]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nc</span><span class="p">)]</span>
+    
+    <span class="n">classes_cnt</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nc</span><span class="p">)]</span>
+
+    <span class="k">for</span> <span class="n">indx</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">train_x</span><span class="p">):</span>
+        
+        
+        <span class="n">classes_cnt</span><span class="p">[</span><span class="n">train_y</span><span class="p">[</span><span class="n">indx</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>
+            <span class="n">pixels_cnt</span><span class="p">[</span><span class="n">train_y</span><span class="p">[</span><span class="n">indx</span><span class="p">][</span><span class="mi">0</span><span class="p">]][</span><span class="n">i</span><span class="p">][</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                
+    <span class="k">return</span> <span class="n">classes_cnt</span><span class="p">,</span> <span class="n">pixels_cnt</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">fit_posterior_disc</span><span class="p">(</span><span class="n">test_x</span><span class="p">,</span> <span class="n">test_y</span><span class="p">,</span> <span class="n">classes_cnt</span><span class="p">,</span> <span class="n">pixels_cnt</span><span class="p">):</span>
+    <span class="n">posterior</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">test_x</span><span class="p">))]</span>
+    <span class="n">accuracy</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">for</span> <span class="n">indx</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">test_x</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>
+                
+                <span class="n">posterior</span><span class="p">[</span><span class="n">indx</span><span class="p">][</span><span class="n">y</span><span class="p">]</span> <span class="o">+=</span> <span class="n">log</span><span class="p">(</span><span class="n">pixels_cnt</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="p">])</span>
+                
+            <span class="n">posterior</span><span class="p">[</span><span class="n">indx</span><span class="p">][</span><span class="n">y</span><span class="p">]</span> <span class="o">-=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">)</span> <span class="o">*</span> <span class="n">log</span><span class="p">(</span><span class="n">classes_cnt</span><span class="p">[</span><span class="n">y</span><span class="p">])</span>
+            <span class="c1">#posterior[idx][label] += log(cnt_classes[label])</span>
+            
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">posterior</span><span class="p">[</span><span class="n">indx</span><span class="p">])</span>
+        <span class="n">answ</span> <span class="o">=</span> <span class="n">test_y</span><span class="p">[</span><span class="n">indx</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">pred</span> <span class="o">==</span> <span class="n">answ</span><span class="p">:</span>
+            <span class="n">accuracy</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy on test images:&quot;</span><span class="p">,</span> <span class="n">accuracy</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">test_y</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">posterior</span><span class="p">,</span> <span class="n">accuracy</span> 
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="n">test_labels</span><span class="p">,</span> <span class="n">posterior</span><span class="p">,</span><span class="n">indx</span><span class="p">):</span>
+    <span class="n">p</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">posterior</span><span class="p">[</span><span class="n">indx</span><span class="p">])</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">posterior</span><span class="p">[</span><span class="n">indx</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Posterior (in log scale):</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">))):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="s1">&#39;:&#39;</span><span class="p">,</span><span class="n">p</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="c1">#print marginalized posterior </span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;index: </span><span class="si">{}</span><span class="se">\t</span><span class="s2"> label : </span><span class="si">{}</span><span class="se">\t</span><span class="s2"> predict : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">indx</span><span class="p">,</span> <span class="n">test_y</span><span class="o">.</span><span class="n">dset</span><span class="p">[</span><span class="n">indx</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">posterior</span><span class="p">[</span><span class="n">indx</span><span class="p">])))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">imagination_discrete</span><span class="p">(</span><span class="n">count_pixels</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="n">pixel_sum_015</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">pixel_sum_031</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">img_num</span> <span class="o">=</span><span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="mi">28</span><span class="o">*</span><span class="mi">28</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="mi">784</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">32</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">k</span><span class="o">&lt;</span><span class="mi">16</span><span class="p">:</span>
+                <span class="n">pixel_sum_015</span><span class="o">=</span><span class="n">pixel_sum_015</span><span class="o">+</span><span class="n">count_pixels</span><span class="p">[</span><span class="n">label</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pixel_sum_031</span><span class="o">=</span><span class="n">pixel_sum_031</span><span class="o">+</span><span class="n">count_pixels</span><span class="p">[</span><span class="n">label</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
+            
+        <span class="k">if</span> <span class="n">pixel_sum_015</span><span class="o">&gt;</span><span class="n">pixel_sum_031</span><span class="p">:</span>
+            <span class="n">img_num</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+            <span class="n">pixel_sum_015</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">img_num</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
+            <span class="n">pixel_sum_031</span><span class="o">=</span><span class="mi">0</span> 
+    <span class="n">img_num</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img_num</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span><span class="mi">28</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">img_num</span><span class="p">)</span>
+    
+    <span class="c1">#plt.imshow(img_num)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Run-Discrete-Naive-Bayes">Run Discrete Naive Bayes<a class="anchor-link" href="#Run-Discrete-Naive-Bayes"> </a></h1>
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cnt_classes</span><span class="p">,</span> <span class="n">cnt_pixels</span> <span class="o">=</span> <span class="n">cnt_pixclass</span><span class="p">(</span><span class="n">train_x</span><span class="o">.</span><span class="n">dset</span><span class="p">,</span> <span class="n">train_y</span><span class="o">.</span><span class="n">dset</span><span class="p">)</span>
+<span class="n">posterior</span><span class="p">,</span> <span class="n">accuracy</span> <span class="o">=</span> <span class="n">fit_posterior_disc</span><span class="p">(</span><span class="n">test_x</span><span class="o">.</span><span class="n">dset</span><span class="p">,</span> <span class="n">test_y</span><span class="o">.</span><span class="n">dset</span><span class="p">,</span> <span class="n">cnt_classes</span><span class="p">,</span> <span class="n">cnt_pixels</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Accuracy on test images: 0.8508
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">predict</span><span class="p">(</span><span class="n">test_y</span><span class="p">,</span> <span class="n">posterior</span><span class="p">,</span><span class="n">indx</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Posterior (in log scale):
+
+0 : 0.10791986716830107
+1 : 0.14022635805906106
+2 : 0.10101108316185439
+3 : 0.0934057462599313
+4 : 0.0829546091731439
+5 : 0.0885178550027136
+6 : 0.11456577642271916
+7 : 0.09194392970975554
+8 : 0.09068244277920456
+9 : 0.08877233226331545
+index: 6	 label : 4	 predict : 4
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">imagination_discrete</span><span class="p">(</span><span class="n">cnt_pixels</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 1 0 1 0 1 0 1 0 1 0 1 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 1 0 1 0 1 1 0 1 1 0 1 0 1 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 1 0 0 1 0 0 1 0 1 0 1 0 1 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 1 0 1 0 1 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 1 0 0 1 0 1 0 1 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 1 0 0 1 0 1 1 0 1 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 1 0 1 1 0 1 1 0 1 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 1 0 1 1 1 0 1 0 1 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 1 0 1 0 1 0 1 0 1 0 1 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 1 0 1 0 1 0 1 0 1 0 1 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 0 1 0 1 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 1 0 1 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 1 0 1 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 1 0 0 0 0 0 0 1 0 1 0 1 0 1 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 1 0 0 1 0 0 0 1 0 1 0 1 0 1 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 1 0 1 0 1 0 1 0 1 0 1 1 0 1 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 1 0 1 0 1 0 1 1 0 1 1 0 1 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 1 0 1 0 1 0 1 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 1 0 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]]
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="s2">&quot;Discrete Error rate : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="p">(</span><span class="n">accuracy</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">test_x</span><span class="o">.</span><span class="n">dset</span><span class="p">)))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;Discrete Error rate : 0.1492&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Continous">Continous<a class="anchor-link" href="#Continous"> </a></h1>
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">extract_pixels</span><span class="p">(</span><span class="n">train_x</span><span class="p">,</span><span class="n">train_y</span><span class="p">):</span>
+    <span class="n">pixels</span> <span class="o">=</span> <span class="p">[[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">28</span><span class="o">*</span><span class="mi">28</span><span class="p">)]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+
+    <span class="k">for</span> <span class="n">indx</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">train_x</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>
+            <span class="n">pixels</span><span class="p">[</span><span class="n">train_y</span><span class="p">[</span><span class="n">indx</span><span class="p">][</span><span class="mi">0</span><span class="p">]][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            
+    <span class="k">return</span> <span class="n">pixels</span>
+    
+<span class="k">def</span> <span class="nf">normal</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+    <span class="k">return</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="p">(</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="p">(((</span><span class="n">x</span> <span class="o">-</span> <span class="n">u</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">v</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">v</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">pdf1</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+    <span class="k">return</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">erf</span><span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">u</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">v</span><span class="p">))))</span>
+
+<span class="k">def</span> <span class="nf">pdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">cdf</span><span class="p">):</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">cdf</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">w</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">cdf</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">w</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">b</span> <span class="o">-</span> <span class="n">a</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">sample_u_v</span><span class="p">(</span><span class="n">pixels</span><span class="p">):</span>
+    <span class="n">pixel_normal</span> <span class="o">=</span> <span class="p">[[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">28</span><span class="o">*</span><span class="mi">28</span><span class="p">)]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+    <span class="n">var</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="mi">3</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">28</span><span class="o">*</span><span class="mi">28</span><span class="p">):</span>
+        
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pixels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">pixels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span> <span class="o">/</span> <span class="n">n</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([(</span><span class="n">x</span> <span class="o">-</span> <span class="n">u</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">pixels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]])</span> <span class="o">/</span> <span class="n">n</span>
+            <span class="n">pixel_normal</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">u</span>
+        
+            <span class="k">if</span> <span class="n">v</span> <span class="o">&lt;=</span> <span class="n">var</span><span class="p">:</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">var</span>
+            <span class="n">pixel_normal</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+            <span class="n">pixel_normal</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">normal</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+            <span class="n">pixel_normal</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pdf1</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+        
+    <span class="k">return</span> <span class="n">pixel_normal</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">fit_post_cont</span><span class="p">(</span><span class="n">test_x</span><span class="p">,</span> <span class="n">test_y</span><span class="p">,</span> <span class="n">pixel_normal</span><span class="p">,</span> <span class="n">cnt_classess</span><span class="p">):</span>
+    <span class="n">accuracy</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">ln0</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**-</span><span class="mi">10</span>
+    <span class="n">posterior</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">test_x</span><span class="p">))]</span>
+    <span class="k">for</span> <span class="n">indx</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">test_x</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">28</span><span class="o">*</span><span class="mi">28</span><span class="p">):</span>
+           
+                <span class="n">p</span> <span class="o">=</span> <span class="n">pdf</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">width</span><span class="p">,</span> <span class="n">pixel_normal</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">3</span><span class="p">])</span>
+
+                <span class="k">if</span> <span class="n">p</span> <span class="o">&lt;=</span> <span class="n">ln0</span><span class="p">:</span>
+                    <span class="n">posterior</span><span class="p">[</span><span class="n">indx</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">+=</span> <span class="n">log</span><span class="p">(</span><span class="n">ln0</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                
+                <span class="n">posterior</span><span class="p">[</span><span class="n">indx</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">+=</span> <span class="n">log</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+            <span class="n">posterior</span><span class="p">[</span><span class="n">indx</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">+=</span> <span class="n">log</span><span class="p">(</span><span class="n">cnt_classes</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+    
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">posterior</span><span class="p">[</span><span class="n">indx</span><span class="p">])</span>
+        <span class="n">answ</span> <span class="o">=</span> <span class="n">test_y</span><span class="p">[</span><span class="n">indx</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    
+        <span class="k">if</span> <span class="n">pred</span> <span class="o">==</span> <span class="n">answ</span><span class="p">:</span>
+            <span class="n">accuracy</span> <span class="o">+=</span> <span class="mi">1</span>
+   
+    <span class="k">return</span> <span class="n">posterior</span><span class="p">,</span> <span class="n">accuracy</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">imagination_continous</span><span class="p">(</span><span class="n">pixels</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">pixel_mean</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">img_num</span> <span class="o">=</span><span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="mi">28</span><span class="o">*</span><span class="mi">28</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="mi">784</span><span class="p">):</span>
+        <span class="n">pixel_mean</span> <span class="o">=</span><span class="n">pixels</span><span class="p">[</span><span class="n">label</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            
+        <span class="k">if</span> <span class="n">pixel_mean</span><span class="o">&lt;=</span><span class="mi">127</span><span class="p">:</span>
+            <span class="n">img_num</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+            <span class="n">pixel_mean</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">img_num</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span> 
+            <span class="n">pixel_mean</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">img_num</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img_num</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span><span class="mi">28</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">img_num</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Run-continous-Naive-Bayes">Run continous Naive Bayes<a class="anchor-link" href="#Run-continous-Naive-Bayes"> </a></h1>
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pixels</span><span class="o">=</span><span class="n">extract_pixels</span><span class="p">(</span><span class="n">train_x</span><span class="o">.</span><span class="n">dset</span><span class="p">,</span><span class="n">train_y</span><span class="o">.</span><span class="n">dset</span><span class="p">)</span>
+<span class="n">pixel_normal</span><span class="o">=</span><span class="n">sample_u_v</span><span class="p">(</span><span class="n">pixels</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">poster</span><span class="p">,</span> <span class="n">accuracy1</span> <span class="o">=</span><span class="n">fit_post_cont</span><span class="p">(</span><span class="n">test_x</span><span class="o">.</span><span class="n">dset</span><span class="p">,</span> <span class="n">test_y</span><span class="o">.</span><span class="n">dset</span><span class="p">,</span> <span class="n">pixel_normal</span><span class="p">,</span> <span class="n">cnt_classes</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="s2">&quot;Continuous accuracy: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">accuracy</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">test_y</span><span class="o">.</span><span class="n">dset</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;Continuous accuracy: 0.8508&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">predict</span><span class="p">(</span><span class="n">test_y</span><span class="o">.</span><span class="n">dset</span><span class="p">,</span> <span class="n">poster</span><span class="p">,</span><span class="n">indx</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Posterior (in log scale):
+
+0 : 0.10306149487014399
+1 : 0.11229989126971714
+2 : 0.10233893586749167
+3 : 0.10202525967813285
+4 : 0.0956631808355246
+5 : 0.09863294727661963
+6 : 0.10240148473075054
+7 : 0.09402389601933993
+8 : 0.09638031611014225
+9 : 0.09317259334213739
+index: 9	 label : 9	 predict : 9
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">imagination_continous</span><span class="p">(</span><span class="n">pixel_normal</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 1 1 0 0 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]]
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="s2">&quot;Discrete Error rate : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="p">(</span><span class="n">accuracy1</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">test_y</span><span class="o">.</span><span class="n">dset</span><span class="p">)))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;Discrete Error rate : 0.17000000000000004&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Online-Learning">Online Learning<a class="anchor-link" href="#Online-Learning"> </a></h1>
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tosscoin</span><span class="o">=</span><span class="p">[]</span>
+<span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tosscoin.txt&#39;</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">tosses</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">trail</span> <span class="ow">in</span> <span class="n">tosses</span><span class="p">:</span>
+        <span class="n">N</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">trail</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">m</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">trail</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">trail</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;1&#39;</span><span class="p">:</span>
+                <span class="n">m</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="n">tosscoin</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="n">m</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">tosscoin</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[(22, 13), (7, 5), (12, 9), (41, 37), (22, 13), (7, 4), (12, 7), (123, 111), (52, 28), (45, 26), (48, 22), (43, 22), (43, 21), (59, 32), (38, 16), (46, 23), (38, 15), (56, 27), (39, 18), (33, 16), (37, 21), (55, 30), (71, 36), (44, 21), (58, 23), (66, 32), (62, 36)]
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">online_learning</span><span class="p">(</span><span class="n">tosscoin</span><span class="p">,</span> <span class="n">init_a</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">init_b</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+    <span class="n">beta_a</span> <span class="o">=</span> <span class="n">init_a</span>
+    <span class="n">beta_b</span> <span class="o">=</span> <span class="n">init_b</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Prior(a,b) : (</span><span class="si">{}</span><span class="s2">,</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta_a</span><span class="p">,</span> <span class="n">beta_b</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">m</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tosscoin</span><span class="p">):</span>
+
+        <span class="n">prior_a</span> <span class="o">=</span> <span class="n">beta_a</span>
+        <span class="n">prior_b</span> <span class="o">=</span> <span class="n">beta_b</span>
+        <span class="n">beta_a</span> <span class="o">+=</span> <span class="n">m</span>
+        <span class="n">beta_b</span> <span class="o">+=</span> <span class="n">N</span><span class="o">-</span><span class="n">m</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Binomial likelihood: </span><span class="si">{:.3f}</span><span class="se">\t</span><span class="s2"> Prior(a,b): (</span><span class="si">{}</span><span class="s2">,</span><span class="si">{}</span><span class="s2">)</span><span class="se">\t</span><span class="s2"> Posterior(a,b): (</span><span class="si">{}</span><span class="s2">,</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">m</span><span class="o">/</span><span class="n">N</span><span class="p">,</span> <span class="n">prior_a</span><span class="p">,</span> <span class="n">prior_b</span><span class="p">,</span> <span class="n">beta_a</span><span class="p">,</span> <span class="n">beta_b</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">online_learning</span><span class="p">(</span><span class="n">tosscoin</span><span class="p">,</span> <span class="n">init_a</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">init_b</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Prior(a,b) : (0,0)
+Binomial likelihood: 0.591	 Prior(a,b): (0,0)	 Posterior(a,b): (13,9)
+Binomial likelihood: 0.714	 Prior(a,b): (13,9)	 Posterior(a,b): (18,11)
+Binomial likelihood: 0.750	 Prior(a,b): (18,11)	 Posterior(a,b): (27,14)
+Binomial likelihood: 0.902	 Prior(a,b): (27,14)	 Posterior(a,b): (64,18)
+Binomial likelihood: 0.591	 Prior(a,b): (64,18)	 Posterior(a,b): (77,27)
+Binomial likelihood: 0.571	 Prior(a,b): (77,27)	 Posterior(a,b): (81,30)
+Binomial likelihood: 0.583	 Prior(a,b): (81,30)	 Posterior(a,b): (88,35)
+Binomial likelihood: 0.902	 Prior(a,b): (88,35)	 Posterior(a,b): (199,47)
+Binomial likelihood: 0.538	 Prior(a,b): (199,47)	 Posterior(a,b): (227,71)
+Binomial likelihood: 0.578	 Prior(a,b): (227,71)	 Posterior(a,b): (253,90)
+Binomial likelihood: 0.458	 Prior(a,b): (253,90)	 Posterior(a,b): (275,116)
+Binomial likelihood: 0.512	 Prior(a,b): (275,116)	 Posterior(a,b): (297,137)
+Binomial likelihood: 0.488	 Prior(a,b): (297,137)	 Posterior(a,b): (318,159)
+Binomial likelihood: 0.542	 Prior(a,b): (318,159)	 Posterior(a,b): (350,186)
+Binomial likelihood: 0.421	 Prior(a,b): (350,186)	 Posterior(a,b): (366,208)
+Binomial likelihood: 0.500	 Prior(a,b): (366,208)	 Posterior(a,b): (389,231)
+Binomial likelihood: 0.395	 Prior(a,b): (389,231)	 Posterior(a,b): (404,254)
+Binomial likelihood: 0.482	 Prior(a,b): (404,254)	 Posterior(a,b): (431,283)
+Binomial likelihood: 0.462	 Prior(a,b): (431,283)	 Posterior(a,b): (449,304)
+Binomial likelihood: 0.485	 Prior(a,b): (449,304)	 Posterior(a,b): (465,321)
+Binomial likelihood: 0.568	 Prior(a,b): (465,321)	 Posterior(a,b): (486,337)
+Binomial likelihood: 0.545	 Prior(a,b): (486,337)	 Posterior(a,b): (516,362)
+Binomial likelihood: 0.507	 Prior(a,b): (516,362)	 Posterior(a,b): (552,397)
+Binomial likelihood: 0.477	 Prior(a,b): (552,397)	 Posterior(a,b): (573,420)
+Binomial likelihood: 0.397	 Prior(a,b): (573,420)	 Posterior(a,b): (596,455)
+Binomial likelihood: 0.485	 Prior(a,b): (596,455)	 Posterior(a,b): (628,489)
+Binomial likelihood: 0.581	 Prior(a,b): (628,489)	 Posterior(a,b): (664,515)
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">online_learning</span><span class="p">(</span><span class="n">tosscoin</span><span class="p">,</span> <span class="n">init_a</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">init_b</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Prior(a,b) : (10,1)
+Binomial likelihood: 0.591	 Prior(a,b): (10,1)	 Posterior(a,b): (23,10)
+Binomial likelihood: 0.714	 Prior(a,b): (23,10)	 Posterior(a,b): (28,12)
+Binomial likelihood: 0.750	 Prior(a,b): (28,12)	 Posterior(a,b): (37,15)
+Binomial likelihood: 0.902	 Prior(a,b): (37,15)	 Posterior(a,b): (74,19)
+Binomial likelihood: 0.591	 Prior(a,b): (74,19)	 Posterior(a,b): (87,28)
+Binomial likelihood: 0.571	 Prior(a,b): (87,28)	 Posterior(a,b): (91,31)
+Binomial likelihood: 0.583	 Prior(a,b): (91,31)	 Posterior(a,b): (98,36)
+Binomial likelihood: 0.902	 Prior(a,b): (98,36)	 Posterior(a,b): (209,48)
+Binomial likelihood: 0.538	 Prior(a,b): (209,48)	 Posterior(a,b): (237,72)
+Binomial likelihood: 0.578	 Prior(a,b): (237,72)	 Posterior(a,b): (263,91)
+Binomial likelihood: 0.458	 Prior(a,b): (263,91)	 Posterior(a,b): (285,117)
+Binomial likelihood: 0.512	 Prior(a,b): (285,117)	 Posterior(a,b): (307,138)
+Binomial likelihood: 0.488	 Prior(a,b): (307,138)	 Posterior(a,b): (328,160)
+Binomial likelihood: 0.542	 Prior(a,b): (328,160)	 Posterior(a,b): (360,187)
+Binomial likelihood: 0.421	 Prior(a,b): (360,187)	 Posterior(a,b): (376,209)
+Binomial likelihood: 0.500	 Prior(a,b): (376,209)	 Posterior(a,b): (399,232)
+Binomial likelihood: 0.395	 Prior(a,b): (399,232)	 Posterior(a,b): (414,255)
+Binomial likelihood: 0.482	 Prior(a,b): (414,255)	 Posterior(a,b): (441,284)
+Binomial likelihood: 0.462	 Prior(a,b): (441,284)	 Posterior(a,b): (459,305)
+Binomial likelihood: 0.485	 Prior(a,b): (459,305)	 Posterior(a,b): (475,322)
+Binomial likelihood: 0.568	 Prior(a,b): (475,322)	 Posterior(a,b): (496,338)
+Binomial likelihood: 0.545	 Prior(a,b): (496,338)	 Posterior(a,b): (526,363)
+Binomial likelihood: 0.507	 Prior(a,b): (526,363)	 Posterior(a,b): (562,398)
+Binomial likelihood: 0.477	 Prior(a,b): (562,398)	 Posterior(a,b): (583,421)
+Binomial likelihood: 0.397	 Prior(a,b): (583,421)	 Posterior(a,b): (606,456)
+Binomial likelihood: 0.485	 Prior(a,b): (606,456)	 Posterior(a,b): (638,490)
+Binomial likelihood: 0.581	 Prior(a,b): (638,490)	 Posterior(a,b): (674,516)
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+</div>
+
+
+
+  </div><a class="u-url" href="/aiblog/2020/11/20/Naive-Bayes-classifier-for-MNIST.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/aiblog/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/aiblog/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/aiblog/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>AI . Computer Vision . Deep Learning . Machine Learning . Problem solving .</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/rashidch" title="rashidch"><svg class="svg-icon grey"><use xlink:href="/aiblog/assets/minima-social-icons.svg#github"></use></svg></a></li><li><a rel="me" href="https://www.linkedin.com/in/rasho" title="rasho"><svg class="svg-icon grey"><use xlink:href="/aiblog/assets/minima-social-icons.svg#linkedin"></use></svg></a></li><li><a rel="me" href="https://twitter.com/rashidchauhdry" title="rashidchauhdry"><svg class="svg-icon grey"><use xlink:href="/aiblog/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
