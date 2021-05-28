@@ -129,16 +129,16 @@ window.onload = wrap_img;
 <h2 id="Basics:">Basics:<a class="anchor-link" href="#Basics:"> </a></h2><ul>
 <li>Pose estimation is defined as the problem of localization of human joints.</li>
 <li>Pose estimation is the search for a specific pose in space of all articulated (jointed, connected) poses </li>
-<li>Number of key points varies with the datasets - LSP has 14, MPII has 16, 16 are used in Human3.6m </li>
+<li>Number of keypoints varies with the datasets - LSP has 14, MPII has 16, 16 are used in Human3.6m </li>
 <li>Pose estimation is classified into 2d and 3d pose estimation:<ul>
-<li>2D  pose estimation estimates a 2d pose (x,y) coordinates for each joint in pixel space from a RGB image</li>
-<li>3D pose estimation estimation a 3D pose (x,y,z) coordinates in metric space from a RGB image</li>
+<li>2D pose estimation estimates a 2d pose (x,y) coordinates for each joint in pixel space from a RGB image</li>
+<li>3D pose estimation estimates a 3D pose (x,y,z) coordinates in metric space from a RGB image</li>
 </ul>
 </li>
 </ul>
 <h2 id="Loss-function:">Loss function:<a class="anchor-link" href="#Loss-function:"> </a></h2><ul>
 <li>Most commonly used loss function - Mean Squared Error, MSE(Least Squares Loss)</li>
-<li>This is a regression problem. The model will try to regress to the correct coordinates i.e., move to the truth coordinates in small increments. The mode is trained to output continuous coordinates using a Mean Squared Error Loss function</li>
+<li>This is a regression problem. The model will try to regress to the correct coordinates i.e., move to the gound truth coordinates in small increments. The model is trained to output continuous coordinates using a Mean Squared Error Loss function</li>
 </ul>
 <h2 id="Evaluation-metrics:">Evaluation metrics:<a class="anchor-link" href="#Evaluation-metrics:"> </a></h2><ol>
 <li>Percentage of correct keypoints <ul>
@@ -147,7 +147,7 @@ window.onload = wrap_img;
 <li>PCK@0.2 == distance between predicted and true joint &lt;0.2*torso diameter </li>
 <li>Sometimes 150 mm is taken as the threshold</li>
 <li>Head, shoulder Elbow, Wrist, Hip, Knee Ankle → keypoints</li>
-<li>PCK is used as 2D and 3D pose estimation</li>
+<li>PCK is used in 2D and 3D pose estimation</li>
 <li>Higher the better </li>
 </ul>
 </li>
